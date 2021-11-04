@@ -1,0 +1,69 @@
+SELECT *,
+	CASE
+		WHEN frequency = 'POPLATEK MESICNE' THEN 'Monthly'
+		WHEN frequency = 'POPLATEK TYDNE' THEN 'Weekly'
+		WHEN frequency = 'POPLATEK PO OBRATU' THEN 'Constant'
+	END AS Statement_Issuance
+FROM account AS a
+INNER JOIN disp AS d
+ON a.account_id = d.account_id
+INNER JOIN client AS c
+ON d.client_id = c.client_id
+
+CREATE VIEW Account2Creation AS
+(SELECT account_id, district_id,
+	CASE
+		WHEN frequency = 'POPLATEK MESICNE' THEN 'Monthly'
+		WHEN frequency = 'POPLATEK TYDNE' THEN 'Weekly'
+		WHEN frequency = 'POPLATEK PO OBRATU' THEN 'Constant'
+	END AS Statement_Frequency,
+	date AS Start_Date,
+	DATEDIFF(DAY, date, '1998-12-31') AS Account_Age
+FROM account
+
+CREATE VIEW Trans2Creation AS
+(SELECT trans_id, account_id, [date],
+	CASE
+		WHEN [type] = 'PRIJEM' THEN 'Credit'
+		WHEN [type] = 'VYDAJ' THEN 'Withdrawal'
+		ELSE NULL
+	END AS Transaction_Type,
+	CASE	
+		WHEN [operation] = 'VYBER KARTOU' THEN 'Credit Card Withdrawal'
+		WHEN [operation] = 'VKLAD' THEN 'Credit in Cash'
+		WHEN [operation] = 'PREVOD Z UCTU' THEN 'Collection From Another Bank'
+		WHEN [operation] = 'VYBER' THEN 'Withdrawal in Cash'
+		WHEN [operation] = 'PREVOD NA UCET' THEN 'Remittance to Another Bank'
+		ELSE NULL
+	END AS Mode_of_Transaction,
+	Amount,
+	Balance,
+	CASE
+		WHEN [k_symbol] = 'POJISTNE' THEN 'Insurance Payment'
+		WHEN [k_symbol] = 'SLUZBY' THEN 'Payment for Statement'
+		WHEN [k_symbol] = 'UROK' THEN 'Interest Credited'
+		WHEN [k_symbol] = 'SANKC.UROK' THEN 'Sanction Interest if Negative Balance'
+		WHEN [k_symbol] = 'SIPO' THEN 'Household'
+		WHEN [k_symbol] = 'DUCHOD' THEN 'Old-Age Pension'
+		WHEN [k_symbol] = 'UVER' THEN 'Loan Payment' 
+		ELSE NULL
+	END AS Transaction_Characterisation,
+	Bank,
+	Account
+FROM trans)
+
+SELECT * FROM [order]
+
+CREATE VIEW Order2Creation AS
+(SELECT order_id, account_id, bank_to, account_to, amount,
+	CASE
+		WHEN [k_symbol] = 'POJISTNE' THEN 'Insurance Payment'
+		WHEN [k_symbol] = 'SLUZBY' THEN 'Payment for Statement'
+		WHEN [k_symbol] = 'UROK' THEN 'Interest Credited'
+		WHEN [k_symbol] = 'SANKC.UROK' THEN 'Sanction Interest if Negative Balance'
+		WHEN [k_symbol] = 'SIPO' THEN 'Household'
+		WHEN [k_symbol] = 'DUCHOD' THEN 'Old-Age Pension'
+		WHEN [k_symbol] = 'UVER' THEN 'Loan Payment' 
+		ELSE NULL
+	END AS Transaction_Characterisation
+FROM [order])
