@@ -1,0 +1,23 @@
+SELECT *,
+	CASE 
+		WHEN status = 'A' OR status = 'C' THEN 1
+		WHEN status = 'B' OR status = 'D' THEN 0
+	ELSE NULL
+	END AS Loan_Quality
+INTO Loan_Qual
+FROM Loan
+
+SELECT *
+FROM customer_ranking c
+INNER JOIN Loan_Qual l
+ON c.account_id = l.account_id
+INNER JOIN account a
+ON a.account_id = l.account_id
+INNER JOIN disp d
+ON d.account_id = a.account_id
+INNER JOIN client cl
+ON d.client_id = cl.client_id
+INNER JOIN district d1
+ON d1.district_id = cl.district_id
+WHERE ([status] = 'A' OR l.status = 'B' OR l.status = 'C' OR l.status = 'D') AND type = 'OWNER'
+ORDER BY rnk
