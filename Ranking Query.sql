@@ -1,4 +1,6 @@
 USE dp05_eagle
+-- This query must be run before any other queries in the github
+
 
 WITH t AS
 (
