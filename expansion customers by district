@@ -1,0 +1,9 @@
+--To find the expansion customers by district
+SELECT  cr.[District Name], COUNT(cr.account_id) as num_customers
+FROM customer_ranking_dist as cr
+LEFT OUTER JOIN disp as d
+ON cr.account_id = d.account_id
+LEFT OUTER JOIN card as c
+ON c.disp_id = d.disp_id 
+WHERE good_amt IS NULL AND bad_amt IS NULL AND card_id IS NULL
+GROUP BY [District Name]
